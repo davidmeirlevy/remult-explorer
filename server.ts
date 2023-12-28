@@ -1,7 +1,7 @@
 import express from 'express';
 import moduleAlias from 'module-alias'
 import { join } from 'node:path';
-
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 moduleAlias.addAlias('remult', join(__dirname, 'node_modules/remult'))
 
@@ -10,10 +10,10 @@ const entitiesPaths = process.env.ENTITIES_PATHS ? JSON.parse(process.env.ENTITI
 (async () => {
   const app = express();
 
-  const {remult} = await import('remult')
+  const { remult } = await import('remult')
 
-  const { remultExpress } = await import('remult/remult-express')
-  const remultAdmin = (await import('remult-admin')).default
+  const { remultExpress } = await import('remult/remult-express');
+  const remultAdmin = (await import('remult-admin')).default;
 
   const entitiesHolders = await Promise.all(entitiesPaths.map(async p => await import(p)));
 
@@ -39,10 +39,19 @@ const entitiesPaths = process.env.ENTITIES_PATHS ? JSON.parse(process.env.ENTITI
   const api = remultExpress({
     entities,
   });
-  app.use(api);
+
+  if (process.env.PROXY_TARGET) {
+    const target = process.env.PROXY_TARGET.startsWith('http') ? process.env.PROXY_TARGET : 'http://' + process.env.PROXY_TARGET;
+    app.use('/api', createProxyMiddleware({ target, changeOrigin: true }));
+  } else {
+    app.use(api);
+  }
+
   app.get('*', api.withRemult, (req, res) => res.send((remultAdmin.default || remultAdmin)({ entities })));
-  app.listen(3002, () => {
-    console.log('remult-explorer listening on http://localhost:3002');
+
+  const port = process.env.PORT || 3002
+  app.listen(port, () => {
+    console.log('remult-explorer listening on http://localhost:' + port);
   });
 
 })()

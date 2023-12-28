@@ -3,7 +3,7 @@ import moduleAlias from 'module-alias'
 import { join } from 'node:path';
 
 
-moduleAlias.addAlias('rem`ult', join(__dirname, 'node_modules/remult'))
+moduleAlias.addAlias('remult', join(__dirname, 'node_modules/remult'))
 
 const entitiesPaths = process.env.ENTITIES_PATHS ? JSON.parse(process.env.ENTITIES_PATHS) : [];
 

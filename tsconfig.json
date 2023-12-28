@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true
+  },
+  "paths": {
+    "remult": "node_modules/remult",
+    "remult/*": "node_modules/remult/*",
+  }
+}

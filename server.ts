@@ -1,9 +1,18 @@
 import express from 'express';
-import moduleAlias from 'module-alias'
 import { join } from 'node:path';
+import { existsSync } from 'node:fs';
+import moduleAlias from 'module-alias'
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
-moduleAlias.addAlias('remult', join(__dirname, 'node_modules/remult'))
+const remultModule = 'node_modules/remult'
+
+const remultPath = [
+  join(__dirname, remultModule),
+  join(__dirname, '..', remultModule),
+  join(process.env._, '../../lib', remultModule)
+].find(existsSync);
+
+moduleAlias.addAlias('remult', remultPath)
 
 const entitiesPaths = process.env.ENTITIES_PATHS ? JSON.parse(process.env.ENTITIES_PATHS) : [];
 
